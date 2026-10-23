@@ -30,7 +30,8 @@ public class ProductService {
     public long addProduct(
             String name,
             BigDecimal price,
-            int stockQuantity) throws SQLException {
+            int stockQuantity
+    ) throws SQLException {
 
         validateProduct(name, price, stockQuantity);
 
@@ -49,11 +50,12 @@ public class ProductService {
     }
 
     // UPDATE: Validate and update a product
-   public boolean updateProduct(
-        long id,
-        String name,
-        BigDecimal price,
-        int stockQuantity) throws SQLException{
+    public boolean updateProduct(
+            long id,
+            String name,
+            BigDecimal price,
+            int stockQuantity
+    ) throws SQLException {
 
         if (id <= 0) {
             throw new IllegalArgumentException(
@@ -90,7 +92,8 @@ public class ProductService {
     private void validateProduct(
             String name,
             BigDecimal price,
-            int stockQuantity) {
+            int stockQuantity
+    ) {
 
         if (name == null || name.trim().isEmpty()) {
             throw new IllegalArgumentException(

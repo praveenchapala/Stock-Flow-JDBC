@@ -37,8 +37,7 @@ public class ProductDAO {
             if (rowsInserted != 1) {
                 throw new SQLException(
                         "Expected one inserted product, but got "
-                                + rowsInserted + "."
-                );
+                                + rowsInserted + ".");
             }
 
             try (ResultSet keys = statement.getGeneratedKeys()) {
@@ -48,8 +47,7 @@ public class ProductDAO {
             }
 
             throw new SQLException(
-                    "Product was inserted, but no generated ID was returned."
-            );
+                    "Product was inserted, but no generated ID was returned.");
         }
     }
 
@@ -65,8 +63,7 @@ public class ProductDAO {
         List<Product> products = new ArrayList<>();
 
         try (Connection connection = DatabaseConnection.getConnection();
-             PreparedStatement statement =
-                     connection.prepareStatement(sql);
+             PreparedStatement statement = connection.prepareStatement(sql);
              ResultSet resultSet = statement.executeQuery()) {
 
             while (resultSet.next()) {
@@ -75,8 +72,7 @@ public class ProductDAO {
                         resultSet.getString("name"),
                         resultSet.getBigDecimal("price"),
                         resultSet.getInt("stock_quantity"),
-                        resultSet.getBoolean("active")
-                );
+                        resultSet.getBoolean("active"));
 
                 products.add(product);
             }
@@ -95,8 +91,7 @@ public class ProductDAO {
                 """;
 
         try (Connection connection = DatabaseConnection.getConnection();
-             PreparedStatement statement =
-                     connection.prepareStatement(sql)) {
+             PreparedStatement statement = connection.prepareStatement(sql)) {
 
             statement.setString(1, product.getName());
             statement.setBigDecimal(2, product.getPrice());
@@ -113,8 +108,7 @@ public class ProductDAO {
         String sql = "DELETE FROM products WHERE id = ?";
 
         try (Connection connection = DatabaseConnection.getConnection();
-             PreparedStatement statement =
-                     connection.prepareStatement(sql)) {
+             PreparedStatement statement = connection.prepareStatement(sql)) {
 
             statement.setLong(1, id);
 
