@@ -2,8 +2,7 @@
 
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
-         https://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
 
@@ -17,6 +16,8 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.release>17</maven.compiler.release>
+        <mockito.version>5.24.0</mockito.version>
+        <byte-buddy.version>1.18.7</byte-buddy.version>
     </properties>
 
     <dependencies>
@@ -28,11 +29,34 @@
             <version>9.5.0</version>
         </dependency>
 
-        <!-- JUnit 4 for unit testing -->
+        <!-- JUnit 4 -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.13.2</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Mockito for unit testing -->
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>${mockito.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Java 25-compatible Byte Buddy -->
+        <dependency>
+            <groupId>net.bytebuddy</groupId>
+            <artifactId>byte-buddy</artifactId>
+            <version>${byte-buddy.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>net.bytebuddy</groupId>
+            <artifactId>byte-buddy-agent</artifactId>
+            <version>${byte-buddy.version}</version>
             <scope>test</scope>
         </dependency>
 
@@ -41,7 +65,7 @@
     <build>
         <plugins>
 
-            <!-- Compile the project using Java 17 -->
+            <!-- Compile source code using Java 17 -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
