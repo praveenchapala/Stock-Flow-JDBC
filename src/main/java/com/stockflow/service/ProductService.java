@@ -6,19 +6,17 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Objects;
 
+import org.springframework.stereotype.Service;
+
 import com.stockflow.dao.ProductDAO;
 import com.stockflow.model.Product;
 
+@Service
 public class ProductService {
 
     private final ProductDAO productDAO;
 
-    // Used by the actual application
-    public ProductService() {
-        this(new ProductDAO());
-    }
-
-    // Used for dependency injection and unit testing
+    // Constructor injection
     public ProductService(ProductDAO productDAO) {
         this.productDAO = Objects.requireNonNull(
                 productDAO,
@@ -26,7 +24,7 @@ public class ProductService {
         );
     }
 
-    // CREATE: Validate and add a product
+    // CREATE
     public long addProduct(
             String name,
             BigDecimal price,
@@ -44,12 +42,12 @@ public class ProductService {
         return productDAO.addProduct(product);
     }
 
-    // READ: Retrieve all products
+    // READ
     public List<Product> getAllProducts() throws SQLException {
         return productDAO.getAllProducts();
     }
 
-    // UPDATE: Validate and update a product
+    // UPDATE
     public boolean updateProduct(
             long id,
             String name,
@@ -76,7 +74,7 @@ public class ProductService {
         return productDAO.updateProduct(product);
     }
 
-    // DELETE: Validate and delete a product
+    // DELETE
     public boolean deleteProduct(long id) throws SQLException {
 
         if (id <= 0) {
@@ -88,7 +86,7 @@ public class ProductService {
         return productDAO.deleteProduct(id);
     }
 
-    // Shared validation for product creation and updates
+    // Shared business validation
     private void validateProduct(
             String name,
             BigDecimal price,

@@ -6,6 +6,7 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Scanner;
 
+import com.stockflow.dao.ProductDAO;
 import com.stockflow.model.Product;
 import com.stockflow.service.ProductService;
 
@@ -13,8 +14,10 @@ public class Main {
 
     private static final Scanner SCANNER = new Scanner(System.in);
 
+    // Standalone CLI initialization.
+    // The Spring Boot REST API uses Spring-managed dependency injection.
     private static final ProductService PRODUCT_SERVICE =
-            new ProductService();
+            new ProductService(new ProductDAO());
 
     public static void main(String[] args) {
 
@@ -62,7 +65,7 @@ public class Main {
             } catch (SQLException e) {
                 System.err.println(
                         "Unable to complete the database operation. "
-                        + "Please try again.");
+                                + "Please try again.");
 
                 // Detailed diagnostics for local development.
                 e.printStackTrace(System.err);

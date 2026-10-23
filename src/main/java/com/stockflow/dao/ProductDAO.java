@@ -9,9 +9,12 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.stereotype.Repository;
+
 import com.stockflow.DatabaseConnection;
 import com.stockflow.model.Product;
 
+@Repository
 public class ProductDAO {
 
     // CREATE: Add a product and return its generated ID
@@ -37,7 +40,8 @@ public class ProductDAO {
             if (rowsInserted != 1) {
                 throw new SQLException(
                         "Expected one inserted product, but got "
-                                + rowsInserted + ".");
+                                + rowsInserted + "."
+                );
             }
 
             try (ResultSet keys = statement.getGeneratedKeys()) {
@@ -47,7 +51,8 @@ public class ProductDAO {
             }
 
             throw new SQLException(
-                    "Product was inserted, but no generated ID was returned.");
+                    "Product was inserted, but no generated ID was returned."
+            );
         }
     }
 
@@ -72,7 +77,8 @@ public class ProductDAO {
                         resultSet.getString("name"),
                         resultSet.getBigDecimal("price"),
                         resultSet.getInt("stock_quantity"),
-                        resultSet.getBoolean("active"));
+                        resultSet.getBoolean("active")
+                );
 
                 products.add(product);
             }

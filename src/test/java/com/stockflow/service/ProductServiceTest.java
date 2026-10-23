@@ -6,9 +6,11 @@ import java.math.BigDecimal;
 import static org.junit.Assert.assertThrows;
 import org.junit.Test;
 
+import com.stockflow.dao.ProductDAO;
+
 public class ProductServiceTest {
 
-    private final ProductService productService = new ProductService();
+    ProductService productService = new ProductService(new ProductDAO());
 
     @Test
     public void addProductShouldRejectEmptyName() {
