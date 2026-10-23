@@ -14,11 +14,12 @@ import com.stockflow.model.Product;
 
 public class ProductDAO {
 
-    // CREATE: Add a new product to the database
+    // CREATE: Add a product to the database
     public long addProduct(Product product) throws SQLException {
 
         String sql = """
-                INSERT INTO products (name, price, stock_quantity, active)
+                INSERT INTO products
+                    (name, price, stock_quantity, active)
                 VALUES (?, ?, ?, ?)
                 """;
 
@@ -48,7 +49,7 @@ public class ProductDAO {
         }
     }
 
-    // READ: Retrieve all products from the database
+    // READ: Retrieve all products
     public List<Product> getAllProducts() throws SQLException {
 
         String sql = """
@@ -60,11 +61,11 @@ public class ProductDAO {
         List<Product> products = new ArrayList<>();
 
         try (Connection connection = DatabaseConnection.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql);
+             PreparedStatement statement =
+                     connection.prepareStatement(sql);
              ResultSet resultSet = statement.executeQuery()) {
 
             while (resultSet.next()) {
-
                 Product product = new Product(
                         resultSet.getInt("id"),
                         resultSet.getString("name"),
@@ -78,5 +79,29 @@ public class ProductDAO {
         }
 
         return products;
+    }
+
+    // UPDATE: Update an existing product
+    public boolean updateProduct(Product product) throws SQLException {
+
+        String sql = """
+                UPDATE products
+                SET name = ?, price = ?, stock_quantity = ?
+                WHERE id = ?
+                """;
+
+        try (Connection connection = DatabaseConnection.getConnection();
+             PreparedStatement statement =
+                     connection.prepareStatement(sql)) {
+
+            statement.setString(1, product.getName());
+            statement.setBigDecimal(2, product.getPrice());
+            statement.setInt(3, product.getStockQuantity());
+            statement.setLong(4, product.getId());
+
+            int rowsUpdated = statement.executeUpdate();
+
+            return rowsUpdated > 0;
+        }
     }
 }
