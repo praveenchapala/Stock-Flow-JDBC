@@ -14,7 +14,7 @@ import com.stockflow.model.Product;
 
 public class ProductDAO {
 
-    // CREATE: Add a product to the database
+    // CREATE: Add a product and return its generated ID
     public long addProduct(Product product) throws SQLException {
 
         String sql = """
@@ -34,8 +34,11 @@ public class ProductDAO {
 
             int rowsInserted = statement.executeUpdate();
 
-            if (rowsInserted == 0) {
-                throw new SQLException("Product insertion failed.");
+            if (rowsInserted != 1) {
+                throw new SQLException(
+                        "Expected one inserted product, but got "
+                                + rowsInserted + "."
+                );
             }
 
             try (ResultSet keys = statement.getGeneratedKeys()) {
@@ -45,7 +48,8 @@ public class ProductDAO {
             }
 
             throw new SQLException(
-                    "Product inserted, but no ID was returned.");
+                    "Product was inserted, but no generated ID was returned."
+            );
         }
     }
 
@@ -67,7 +71,7 @@ public class ProductDAO {
 
             while (resultSet.next()) {
                 Product product = new Product(
-                        resultSet.getInt("id"),
+                        resultSet.getLong("id"),
                         resultSet.getString("name"),
                         resultSet.getBigDecimal("price"),
                         resultSet.getInt("stock_quantity"),
@@ -99,9 +103,7 @@ public class ProductDAO {
             statement.setInt(3, product.getStockQuantity());
             statement.setLong(4, product.getId());
 
-            int rowsUpdated = statement.executeUpdate();
-
-            return rowsUpdated > 0;
+            return statement.executeUpdate() > 0;
         }
     }
 
@@ -116,9 +118,7 @@ public class ProductDAO {
 
             statement.setLong(1, id);
 
-            int rowsDeleted = statement.executeUpdate();
-
-            return rowsDeleted > 0;
+            return statement.executeUpdate() > 0;
         }
     }
 }

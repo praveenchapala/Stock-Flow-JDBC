@@ -4,6 +4,7 @@ package com.stockflow.service;
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Objects;
 
 import com.stockflow.dao.ProductDAO;
 import com.stockflow.model.Product;
@@ -12,8 +13,17 @@ public class ProductService {
 
     private final ProductDAO productDAO;
 
+    // Used by the actual application
     public ProductService() {
-        this.productDAO = new ProductDAO();
+        this(new ProductDAO());
+    }
+
+    // Used for dependency injection and unit testing
+    public ProductService(ProductDAO productDAO) {
+        this.productDAO = Objects.requireNonNull(
+                productDAO,
+                "ProductDAO cannot be null."
+        );
     }
 
     // CREATE: Validate and add a product
@@ -39,15 +49,16 @@ public class ProductService {
     }
 
     // UPDATE: Validate and update a product
-    public boolean updateProduct(
-            int id,
-            String name,
-            BigDecimal price,
-            int stockQuantity) throws SQLException {
+   public boolean updateProduct(
+        long id,
+        String name,
+        BigDecimal price,
+        int stockQuantity) throws SQLException{
 
         if (id <= 0) {
             throw new IllegalArgumentException(
-                    "Product ID must be greater than zero.");
+                    "Product ID must be greater than zero."
+            );
         }
 
         validateProduct(name, price, stockQuantity);
@@ -68,7 +79,8 @@ public class ProductService {
 
         if (id <= 0) {
             throw new IllegalArgumentException(
-                    "Product ID must be greater than zero.");
+                    "Product ID must be greater than zero."
+            );
         }
 
         return productDAO.deleteProduct(id);
@@ -82,17 +94,20 @@ public class ProductService {
 
         if (name == null || name.trim().isEmpty()) {
             throw new IllegalArgumentException(
-                    "Product name cannot be empty.");
+                    "Product name cannot be empty."
+            );
         }
 
         if (price == null || price.compareTo(BigDecimal.ZERO) < 0) {
             throw new IllegalArgumentException(
-                    "Product price cannot be negative.");
+                    "Product price cannot be null or negative."
+            );
         }
 
         if (stockQuantity < 0) {
             throw new IllegalArgumentException(
-                    "Stock quantity cannot be negative.");
+                    "Stock quantity cannot be negative."
+            );
         }
     }
 }
