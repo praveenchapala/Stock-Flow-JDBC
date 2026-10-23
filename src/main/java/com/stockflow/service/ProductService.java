@@ -3,6 +3,7 @@ package com.stockflow.service;
 
 import java.math.BigDecimal;
 import java.sql.SQLException;
+import java.util.List;
 
 import com.stockflow.dao.ProductDAO;
 import com.stockflow.model.Product;
@@ -15,6 +16,7 @@ public class ProductService {
         this.productDAO = new ProductDAO();
     }
 
+    // CREATE: Validate and add a new product
     public long addProduct(String name, BigDecimal price,
                            int stockQuantity) throws SQLException {
 
@@ -36,9 +38,16 @@ public class ProductService {
                     "Stock quantity cannot be negative.");
         }
 
+        // Create Product object
         Product product = new Product(
                 name.trim(), price, stockQuantity);
 
+        // Delegate database operation to DAO
         return productDAO.addProduct(product);
+    }
+
+    // READ: Retrieve all products
+    public List<Product> getAllProducts() throws SQLException {
+        return productDAO.getAllProducts();
     }
 }

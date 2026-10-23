@@ -1,17 +1,20 @@
 
 package com.stockflow.dao;
 
-import com.stockflow.DatabaseConnection;
-import com.stockflow.model.Product;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.stockflow.DatabaseConnection;
+import com.stockflow.model.Product;
 
 public class ProductDAO {
 
+    // CREATE: Add a new product to the database
     public long addProduct(Product product) throws SQLException {
 
         String sql = """
@@ -40,7 +43,40 @@ public class ProductDAO {
                 }
             }
 
-            throw new SQLException("Product inserted, but no ID was returned.");
+            throw new SQLException(
+                    "Product inserted, but no ID was returned.");
         }
+    }
+
+    // READ: Retrieve all products from the database
+    public List<Product> getAllProducts() throws SQLException {
+
+        String sql = """
+                SELECT id, name, price, stock_quantity, active
+                FROM products
+                ORDER BY id
+                """;
+
+        List<Product> products = new ArrayList<>();
+
+        try (Connection connection = DatabaseConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql);
+             ResultSet resultSet = statement.executeQuery()) {
+
+            while (resultSet.next()) {
+
+                Product product = new Product(
+                        resultSet.getInt("id"),
+                        resultSet.getString("name"),
+                        resultSet.getBigDecimal("price"),
+                        resultSet.getInt("stock_quantity"),
+                        resultSet.getBoolean("active")
+                );
+
+                products.add(product);
+            }
+        }
+
+        return products;
     }
 }
