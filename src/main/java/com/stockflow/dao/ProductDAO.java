@@ -104,4 +104,21 @@ public class ProductDAO {
             return rowsUpdated > 0;
         }
     }
+
+    // DELETE: Delete a product by ID
+    public boolean deleteProduct(long id) throws SQLException {
+
+        String sql = "DELETE FROM products WHERE id = ?";
+
+        try (Connection connection = DatabaseConnection.getConnection();
+             PreparedStatement statement =
+                     connection.prepareStatement(sql)) {
+
+            statement.setLong(1, id);
+
+            int rowsDeleted = statement.executeUpdate();
+
+            return rowsDeleted > 0;
+        }
+    }
 }

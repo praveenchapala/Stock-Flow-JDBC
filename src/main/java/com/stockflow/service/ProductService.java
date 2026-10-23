@@ -63,6 +63,17 @@ public class ProductService {
         return productDAO.updateProduct(product);
     }
 
+    // DELETE: Validate and delete a product
+    public boolean deleteProduct(long id) throws SQLException {
+
+        if (id <= 0) {
+            throw new IllegalArgumentException(
+                    "Product ID must be greater than zero.");
+        }
+
+        return productDAO.deleteProduct(id);
+    }
+
     // Shared validation for product creation and updates
     private void validateProduct(
             String name,

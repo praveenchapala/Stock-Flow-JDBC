@@ -25,7 +25,8 @@ public class Main {
                 System.out.println("1. Add Product");
                 System.out.println("2. View All Products");
                 System.out.println("3. Update Product");
-                System.out.println("4. Exit");
+                System.out.println("4. Delete Product");
+                System.out.println("5. Exit");
                 System.out.print("Choose an option: ");
 
                 String choice = scanner.nextLine().trim();
@@ -45,12 +46,11 @@ public class Main {
                             int quantity = Integer.parseInt(
                                     scanner.nextLine().trim());
 
-                            long productId = productService.addProduct(
+                            long id = productService.addProduct(
                                     name, price, quantity);
 
                             System.out.println(
-                                    "Product added successfully. ID: "
-                                            + productId);
+                                    "Product added successfully. ID: " + id);
                         }
 
                         case "2" -> displayProducts(productService);
@@ -67,7 +67,8 @@ public class Main {
                             BigDecimal price = new BigDecimal(
                                     scanner.nextLine().trim());
 
-                            System.out.print("Enter updated stock quantity: ");
+                            System.out.print(
+                                    "Enter updated stock quantity: ");
                             int quantity = Integer.parseInt(
                                     scanner.nextLine().trim());
 
@@ -84,12 +85,39 @@ public class Main {
                         }
 
                         case "4" -> {
+                            System.out.print("Enter product ID to delete: ");
+                            long id = Long.parseLong(
+                                    scanner.nextLine().trim());
+
+                            System.out.print(
+                                    "Confirm deletion? Type yes to continue: ");
+
+                            String confirmation = scanner.nextLine().trim();
+
+                            if (!confirmation.equalsIgnoreCase("yes")) {
+                                System.out.println("Deletion cancelled.");
+                                break;
+                            }
+
+                            boolean deleted =
+                                    productService.deleteProduct(id);
+
+                            if (deleted) {
+                                System.out.println(
+                                        "Product deleted successfully.");
+                            } else {
+                                System.out.println(
+                                        "No product found with ID: " + id);
+                            }
+                        }
+
+                        case "5" -> {
                             running = false;
                             System.out.println("Exiting StockFlow.");
                         }
 
                         default -> System.out.println(
-                                "Invalid option. Choose 1, 2, 3, or 4.");
+                                "Invalid option. Choose 1, 2, 3, 4, or 5.");
                     }
 
                 } catch (NumberFormatException e) {
