@@ -6,6 +6,9 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Scanner;
 
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
+
 import com.stockflow.dao.ProductDAO;
 import com.stockflow.model.Product;
 import com.stockflow.service.ProductService;
@@ -14,13 +17,66 @@ public class Main {
 
     private static final Scanner SCANNER = new Scanner(System.in);
 
-    // Standalone CLI initialization.
-    // The Spring Boot REST API uses Spring-managed dependency injection.
-    private static final ProductService PRODUCT_SERVICE =
-            new ProductService(new ProductDAO());
-
     public static void main(String[] args) {
+        try (HikariDataSource dataSource = createDataSource()) {
+            ProductService productService =
+                    new ProductService(new ProductDAO(dataSource));
 
+            runMenu(productService);
+        } catch (IllegalStateException e) {
+            System.err.println("Configuration error: " + e.getMessage());
+        } catch (Exception e) {
+            System.err.println("StockFlow encountered an error.");
+            e.printStackTrace(System.err);
+        } finally {
+            SCANNER.close();
+        }
+    }
+
+    private static HikariDataSource createDataSource() {
+        String url = getEnvironmentValue(
+                "STOCKFLOW_DB_URL",
+                "jdbc:mysql://localhost:3306/stockflow");
+
+        String username =
+                getRequiredEnvironmentValue("STOCKFLOW_DB_USER");
+        String password =
+                getRequiredEnvironmentValue("STOCKFLOW_DB_PASSWORD");
+
+        HikariConfig config = new HikariConfig();
+        config.setJdbcUrl(url);
+        config.setUsername(username);
+        config.setPassword(password);
+        config.setDriverClassName("com.mysql.cj.jdbc.Driver");
+        config.setPoolName("StockFlowCliPool");
+        config.setMaximumPoolSize(5);
+        config.setMinimumIdle(1);
+        config.setConnectionTimeout(30000);
+
+        return new HikariDataSource(config);
+    }
+
+    private static String getEnvironmentValue(
+            String variable, String defaultValue) {
+        String value = System.getenv(variable);
+
+        return value == null || value.isBlank()
+                ? defaultValue
+                : value.trim();
+    }
+
+    private static String getRequiredEnvironmentValue(String variable) {
+        String value = System.getenv(variable);
+
+        if (value == null || value.isBlank()) {
+            throw new IllegalStateException(
+                    "Missing required environment variable: " + variable);
+        }
+
+        return value.trim();
+    }
+
+    private static void runMenu(ProductService productService) {
         boolean running = true;
 
         System.out.println("========================================");
@@ -30,44 +86,32 @@ public class Main {
 
         while (running) {
             displayMenu();
-
             String choice = SCANNER.nextLine().trim();
 
             try {
                 switch (choice) {
-
-                    case "1" -> addProduct();
-
-                    case "2" -> displayProducts();
-
-                    case "3" -> updateProduct();
-
-                    case "4" -> deleteProduct();
-
+                    case "1" -> addProduct(productService);
+                    case "2" -> displayProducts(productService);
+                    case "3" -> updateProduct(productService);
+                    case "4" -> deleteProduct(productService);
                     case "5" -> {
                         running = false;
                         System.out.println(
                                 "Thank you for using StockFlow.");
                     }
-
                     default -> System.out.println(
                             "Invalid option. Please choose 1-5.");
                 }
-
             } catch (NumberFormatException e) {
                 System.out.println(
                         "Invalid input. Please enter a valid number.");
-
             } catch (IllegalArgumentException e) {
                 System.out.println(
                         "Validation error: " + e.getMessage());
-
             } catch (SQLException e) {
                 System.err.println(
                         "Unable to complete the database operation. "
                                 + "Please try again.");
-
-                // Detailed diagnostics for local development.
                 e.printStackTrace(System.err);
             }
 
@@ -75,8 +119,6 @@ public class Main {
                 System.out.println();
             }
         }
-
-        SCANNER.close();
     }
 
     private static void displayMenu() {
@@ -89,32 +131,28 @@ public class Main {
         System.out.print("Choose an option: ");
     }
 
-    private static void addProduct() throws SQLException {
-
+    private static void addProduct(ProductService service)
+            throws SQLException {
         System.out.println("\n--- Add Product ---");
 
         System.out.print("Enter product name: ");
         String name = SCANNER.nextLine();
 
         System.out.print("Enter product price: ");
-        BigDecimal price = new BigDecimal(
-                SCANNER.nextLine().trim());
+        BigDecimal price = new BigDecimal(SCANNER.nextLine().trim());
 
         System.out.print("Enter stock quantity: ");
-        int quantity = Integer.parseInt(
-                SCANNER.nextLine().trim());
+        int quantity = Integer.parseInt(SCANNER.nextLine().trim());
 
-        long id = PRODUCT_SERVICE.addProduct(
-                name, price, quantity);
+        long id = service.addProduct(name, price, quantity);
 
         System.out.println(
                 "Product added successfully. Product ID: " + id);
     }
 
-    private static void displayProducts() throws SQLException {
-
-        List<Product> products =
-                PRODUCT_SERVICE.getAllProducts();
+    private static void displayProducts(ProductService service)
+            throws SQLException {
+        List<Product> products = service.getAllProducts();
 
         if (products.isEmpty()) {
             System.out.println("\nNo products found.");
@@ -122,11 +160,9 @@ public class Main {
         }
 
         System.out.println("\n--- Product Inventory ---");
-
         System.out.printf(
                 "%-8s %-25s %-12s %-12s %-10s%n",
                 "ID", "NAME", "PRICE", "STOCK", "ACTIVE");
-
         System.out.println(
                 "-------------------------------------------------------------------");
 
@@ -142,53 +178,41 @@ public class Main {
 
         System.out.println(
                 "-------------------------------------------------------------------");
-
-        System.out.println(
-                "Total products: " + products.size());
+        System.out.println("Total products: " + products.size());
     }
 
-    private static void updateProduct() throws SQLException {
-
+    private static void updateProduct(ProductService service)
+            throws SQLException {
         System.out.println("\n--- Update Product ---");
 
         System.out.print("Enter product ID to update: ");
-        long id = Long.parseLong(
-                SCANNER.nextLine().trim());
+        long id = Long.parseLong(SCANNER.nextLine().trim());
 
         System.out.print("Enter updated product name: ");
         String name = SCANNER.nextLine();
 
         System.out.print("Enter updated price: ");
-        BigDecimal price = new BigDecimal(
-                SCANNER.nextLine().trim());
+        BigDecimal price = new BigDecimal(SCANNER.nextLine().trim());
 
         System.out.print("Enter updated stock quantity: ");
-        int quantity = Integer.parseInt(
-                SCANNER.nextLine().trim());
+        int quantity = Integer.parseInt(SCANNER.nextLine().trim());
 
-        boolean updated = PRODUCT_SERVICE.updateProduct(
-                id, name, price, quantity);
+        boolean updated =
+                service.updateProduct(id, name, price, quantity);
 
-        if (updated) {
-            System.out.println(
-                    "Product updated successfully.");
-        } else {
-            System.out.println(
-                    "No product found with ID: " + id);
-        }
+        System.out.println(updated
+                ? "Product updated successfully."
+                : "No product found with ID: " + id);
     }
 
-    private static void deleteProduct() throws SQLException {
-
+    private static void deleteProduct(ProductService service)
+            throws SQLException {
         System.out.println("\n--- Delete Product ---");
 
         System.out.print("Enter product ID to delete: ");
-        long id = Long.parseLong(
-                SCANNER.nextLine().trim());
+        long id = Long.parseLong(SCANNER.nextLine().trim());
 
-        System.out.print(
-                "Confirm deletion? Type yes to continue: ");
-
+        System.out.print("Confirm deletion? Type yes to continue: ");
         String confirmation = SCANNER.nextLine().trim();
 
         if (!confirmation.equalsIgnoreCase("yes")) {
@@ -196,15 +220,11 @@ public class Main {
             return;
         }
 
-        boolean deleted = PRODUCT_SERVICE.deleteProduct(id);
+        boolean deleted = service.deleteProduct(id);
 
-        if (deleted) {
-            System.out.println(
-                    "Product deleted successfully.");
-        } else {
-            System.out.println(
-                    "No product found with ID: " + id);
-        }
+        System.out.println(deleted
+                ? "Product deleted successfully."
+                : "No product found with ID: " + id);
     }
 
     private static String truncate(String value, int maxLength) {

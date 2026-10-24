@@ -12,6 +12,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 @RestControllerAdvice
 public class ApiExceptionHandler {
@@ -47,8 +48,21 @@ public class ApiExceptionHandler {
             HttpMessageNotReadableException exception) {
 
         return ResponseEntity.badRequest().body(
-                Map.of("error",
-                        "Request body is missing or contains invalid JSON."));
+                Map.of(
+                        "error",
+                        "Request body is missing or contains invalid JSON."
+                ));
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<Map<String, String>> handleResourceNotFound(
+            NoResourceFoundException exception) {
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                Map.of(
+                        "error", "RESOURCE_NOT_FOUND",
+                        "message", "The requested resource was not found."
+                ));
     }
 
     @ExceptionHandler(SQLException.class)
@@ -57,9 +71,12 @@ public class ApiExceptionHandler {
 
         logger.error("Database operation failed.", exception);
 
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(Map.of("error",
-                        "A database error occurred. Please try again later."));
+        return ResponseEntity.status(
+                HttpStatus.INTERNAL_SERVER_ERROR).body(
+                Map.of(
+                        "error",
+                        "A database error occurred. Please try again later."
+                ));
     }
 
     @ExceptionHandler(Exception.class)
@@ -68,8 +85,11 @@ public class ApiExceptionHandler {
 
         logger.error("Unexpected API error occurred.", exception);
 
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(Map.of("error",
-                        "An unexpected server error occurred."));
+        return ResponseEntity.status(
+                HttpStatus.INTERNAL_SERVER_ERROR).body(
+                Map.of(
+                        "error",
+                        "An unexpected server error occurred."
+                ));
     }
 }

@@ -9,15 +9,23 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.sql.DataSource;
+
 import org.springframework.stereotype.Repository;
 
-import com.stockflow.DatabaseConnection;
 import com.stockflow.model.Product;
 
 @Repository
 public class ProductDAO {
 
-    // CREATE: Add a product and return its generated ID
+    private final DataSource dataSource;
+
+    // Spring injects the configured DataSource.
+    public ProductDAO(DataSource dataSource) {
+        this.dataSource = dataSource;
+    }
+
+    // CREATE: Add a product and return its generated ID.
     public long addProduct(Product product) throws SQLException {
 
         String sql = """
@@ -26,7 +34,7 @@ public class ProductDAO {
                 VALUES (?, ?, ?, ?)
                 """;
 
-        try (Connection connection = DatabaseConnection.getConnection();
+        try (Connection connection = dataSource.getConnection();
              PreparedStatement statement = connection.prepareStatement(
                      sql, Statement.RETURN_GENERATED_KEYS)) {
 
@@ -56,7 +64,7 @@ public class ProductDAO {
         }
     }
 
-    // READ: Retrieve all products
+    // READ: Retrieve all products.
     public List<Product> getAllProducts() throws SQLException {
 
         String sql = """
@@ -67,7 +75,7 @@ public class ProductDAO {
 
         List<Product> products = new ArrayList<>();
 
-        try (Connection connection = DatabaseConnection.getConnection();
+        try (Connection connection = dataSource.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql);
              ResultSet resultSet = statement.executeQuery()) {
 
@@ -87,7 +95,7 @@ public class ProductDAO {
         return products;
     }
 
-    // UPDATE: Update an existing product
+    // UPDATE: Update an existing product.
     public boolean updateProduct(Product product) throws SQLException {
 
         String sql = """
@@ -96,7 +104,7 @@ public class ProductDAO {
                 WHERE id = ?
                 """;
 
-        try (Connection connection = DatabaseConnection.getConnection();
+        try (Connection connection = dataSource.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
 
             statement.setString(1, product.getName());
@@ -108,12 +116,12 @@ public class ProductDAO {
         }
     }
 
-    // DELETE: Delete a product by ID
+    // DELETE: Delete a product by ID.
     public boolean deleteProduct(long id) throws SQLException {
 
         String sql = "DELETE FROM products WHERE id = ?";
 
-        try (Connection connection = DatabaseConnection.getConnection();
+        try (Connection connection = dataSource.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
 
             statement.setLong(1, id);
