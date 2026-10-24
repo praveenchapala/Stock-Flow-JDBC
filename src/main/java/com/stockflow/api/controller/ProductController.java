@@ -1,4 +1,3 @@
-
 package com.stockflow.api.controller;
 
 import java.math.BigDecimal;
@@ -8,6 +7,7 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -39,6 +39,7 @@ import jakarta.validation.constraints.Size;
 @RestController
 @RequestMapping("/api/products")
 @Validated
+@CrossOrigin(origins = "http://localhost:5173")
 @Tag(
     name = "Products",
     description = "APIs for managing inventory products"
@@ -202,7 +203,7 @@ public class ProductController {
             content = @Content(
                 mediaType = "application/json",
                 schema = @Schema(
-                    description = "The current controller returns an empty body when the product does not exist."
+                    description = "The controller returns an empty body when the product does not exist."
                 )
             )
         ),
@@ -275,7 +276,7 @@ public class ProductController {
             content = @Content(
                 mediaType = "application/json",
                 schema = @Schema(
-                    description = "The current controller returns an empty body when the product does not exist."
+                    description = "The controller returns an empty body when the product does not exist."
                 )
             )
         ),
