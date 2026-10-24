@@ -12,7 +12,10 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
+
+import jakarta.validation.ConstraintViolationException;
 
 @RestControllerAdvice
 public class ApiExceptionHandler {
@@ -26,6 +29,31 @@ public class ApiExceptionHandler {
 
         return ResponseEntity.badRequest().body(
                 Map.of("error", exception.getMessage()));
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<Map<String, String>> handleConstraintViolation(
+            ConstraintViolationException exception) {
+
+        String message = exception.getConstraintViolations()
+                .stream()
+                .findFirst()
+                .map(violation -> violation.getMessage())
+                .orElse("Invalid request parameter.");
+
+        return ResponseEntity.badRequest().body(
+                Map.of("error", message));
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<Map<String, String>> handleTypeMismatch(
+            MethodArgumentTypeMismatchException exception) {
+
+        return ResponseEntity.badRequest().body(
+                Map.of(
+                        "error",
+                        "Invalid value for parameter: " + exception.getName()
+                ));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

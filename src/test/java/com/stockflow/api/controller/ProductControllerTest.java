@@ -1,3 +1,4 @@
+
 package com.stockflow.api.controller;
 
 import java.math.BigDecimal;
@@ -6,6 +7,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -87,8 +89,7 @@ class ProductControllerTest {
                         """))
                 .andExpect(status().isBadRequest());
 
-        verify(productService,
-                org.mockito.Mockito.never())
+        verify(productService, never())
                 .addProduct(any(), any(), eq(25));
     }
 
@@ -152,5 +153,21 @@ class ProductControllerTest {
 
         mockMvc.perform(delete("/api/products/999"))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void deleteProductShouldRejectZeroId() throws Exception {
+        mockMvc.perform(delete("/api/products/0"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error")
+                        .value("Product ID must be greater than zero."));
+    }
+
+    @Test
+    void deleteProductShouldRejectNonNumericId() throws Exception {
+        mockMvc.perform(delete("/api/products/abc"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error")
+                        .value("Invalid value for parameter: id"));
     }
 }
